@@ -21,21 +21,51 @@ bot.getMe()
 
 session = HTMLSession()
 
+
+#def returnFood(day):
+
+test = None
+
+
 def getCurrentWeekMenu():
     r = session.get('https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene/interimsmensa-markusplatz-bamberg.html')
     weekMenu = r.html.find('.week.currentweek', first=True)
+
+    
 
     global json_weekMenu
 
     weekDays = weekMenu.find(".day")
 
-    for day in weekDays:
-        t = day.find(".title")
-        for tt in t:
-            print(tt.text)
+    dayList = []
 
-              
+    for day in weekDays:
+       
+        title = day.find(".title", first=True)
+        price = day.find(".price span", first=True)
+
+        
+
+        dayJson = json.dumps({
+            "title": title.text,
+            "price": price.text + "€"
+            
+            })
+
+        dayList.append(dayJson)
+
+
+
+    for all in dayList:
+        print(all)
+             
     
+    global test
+
+    test = dayList[0]
+
+    print(test)
+
     j = json.dumps({
         "monday": {
             "date": "19.08.",
@@ -68,12 +98,13 @@ def getCurrentWeekMenu():
 
     jj = json.loads(j)
     
+    
 
     #print(jj['monday'])
                                     
              
         
-            
+    
     
     
     dailyMenu = weekMenu.find('.title')
@@ -93,19 +124,29 @@ def handle(msg):
 
     msg_text = msg['text']
 
+
     user_id = msg['from']['id']
 
     print(user_id)
     
     if 'menu' in msg_text or 'Menu' in msg_text:
-        #getCurrentWeekMenu()
-        sendMessage(user_id, msg_text)
+        getCurrentWeekMenu()
+        global test
+        test = json.loads(test)
+        testitest = test['title'] + " " + test['price']
+        sendMessage(user_id, testitest)
 
 
 def sendMessage(user_id, text):
     bot.sendMessage(user_id, text)
 
 MessageLoop(bot, handle).run_as_thread()
+
+
+#def main():
+    
+
+
 
 
 
@@ -116,3 +157,6 @@ dailyScheduler = BlockingScheduler()
 #dailyScheduler.add_job(requestBitCoin, 'interval', seconds=60)
 
 #dailyScheduler.start()
+
+#if __name__== "__main__":
+#	main()
