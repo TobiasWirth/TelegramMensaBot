@@ -22,91 +22,116 @@ bot.getMe()
 
 session = HTMLSession()
 
-# def returnFood(day):
-
-r = session.get(
-    'https://web.archive.org/web/20171017053414/http://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene.html?tx_thmensamenu_pi2%5Bmensen%5D=3&tx_thmensamenu_pi2%5Baction%5D=show&tx_thmensamenu_pi2%5Bcontroller%5D=Speiseplan&cHash=c3fe5ebb35e5fba3794f01878e798b7c')
-currentWeekFeki = r.html.find('.week.currentweek', first=True)
-
-# weekDaysMarkushaus = currentWeekMarkushaus.find(".day")
-weekDaysFeki = currentWeekFeki.find(".day")
-
-#day = r.html.find(".day [data-day~=Dienstag]")
-
-#w = weekDaysFeki.find("[data-day~=Dienstag]")
-
-now = datetime.datetime.now()
-
-today = now.today()
+users = []
 
 
-today = r.html.find("#thecurrentday")
+# return menu for cafeteria at Markusstrasse
+def returnMarkusMenu():
+    r = session.get("https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene/interimsmensa-markusplatz-bamberg.html")
+    currentWeekMarkus = r.html.find(".week.currentweek", first=True)
 
-if "Dienstag" in str(today[0]):
-    print('yes')
+    weekDaysMarkus = currentWeekMarkus.find("day")
 
+    #retrieve today's date
+    today = r.html.find("#thecurrentday")
 
-menu = ""
+    # Example element: [<Element 'div' id='thecurrentday' data-day='Dienstag 17.10.'>]
+    # slice and split so that only the current day as a string ('Dienstag') remains
+    today = str(today[0]).split("data-day='")[1][:-2].split(" ")[0]
+    #a = a.split(" ")[0]
 
-for day in weekDaysFeki:
+    # build return string containing menu information
+    menu = "Heute in der Markusstraße: \n"
 
-    if day.find("div[data-day~=Dienstag]"):
-        currentday = day.find("div[data-day~=Dienstag]")
-        for fooditem in currentday:
-            titles = fooditem.find(".title")
-            prices = fooditem.find(".price")
-            i = 1
-            for title in titles:
+    for day in weekDaysMarkus:
 
-                menu += title.text + " " + prices[i].text + "\n"
-                i += 1
+        if day.find("div[data-day~=Dienstag]"):
+            currentday = day.find("div[data-day~="+today+"]")
+            for fooditem in currentday:
+                titles = fooditem.find(".title")
+                prices = fooditem.find(".price")
+                i = 1
+                for title in titles:
 
-print(menu)
+                    menu += title.text + " " + prices[i].text + "\n"
+                    i += 1
 
 
 
+    menu += ("\n" + returnCafeteriaMenu("markus"))
 
+    print(menu)
 
+    return menu
 
-
-
-def getCurrentWeekMenu():
-    # r = session.get('https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene/interimsmensa-markusplatz-bamberg.html')
-
-    # currentWeekMarkushaus = r.html.find('.week.currentweek', first=True)
-
-    # r = session.get('https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene/mensa-feldkirchenstrasse-bamberg.html')
+# return menu for cafeteria at Feldkirchenstrasse
+def returnFekiMenu():
 
     r = session.get(
         'https://web.archive.org/web/20171017053414/http://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene.html?tx_thmensamenu_pi2%5Bmensen%5D=3&tx_thmensamenu_pi2%5Baction%5D=show&tx_thmensamenu_pi2%5Bcontroller%5D=Speiseplan&cHash=c3fe5ebb35e5fba3794f01878e798b7c')
     currentWeekFeki = r.html.find('.week.currentweek', first=True)
 
-    # weekDaysMarkushaus = currentWeekMarkushaus.find(".day")
+
     weekDaysFeki = currentWeekFeki.find(".day")
 
-    # dayListMarkushaus = []
-    dayListFeki = []
+    #retrieve today's date
+    today = r.html.find("#thecurrentday")
 
-    now = datetime.datetime.now()
+    # Example element: [<Element 'div' id='thecurrentday' data-day='Dienstag 17.10.'>]
+    # slice and split so that only the current day as a string ('Dienstag') remains
+    today = str(today[0]).split("data-day='")[1][:-2].split(" ")[0]
+    #a = a.split(" ")[0]
 
-    # Build JSON for Fekimensa menu
+    # build return string containing menu information
+    menu = "Heute an der Feki: \n"
+
     for day in weekDaysFeki:
 
-        titles = day.find(".title")
-        prices = day.find(".price span")
+        if day.find("div[data-day~=Dienstag]"):
+            currentday = day.find("div[data-day~="+today+"]")
+            for fooditem in currentday:
+                titles = fooditem.find(".title")
+                prices = fooditem.find(".price")
+                i = 1
+                for title in titles:
 
+                    menu += title.text + " " + prices[i].text + "\n"
+                    i += 1
+
+    print(menu)
+    return menu
+
+# return menu of alternative cafeteria located at Erba or Markusstrasse
+def returnCafeteriaMenu(cafeteria):
+
+    if cafeteria == "erba":
+        r = session.get("https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/sonderspeiseplaene/cafeteria-erba-insel.html")
+        menu = "Heute in der Erba-Cafeteria: \n"
+    else:
+        r = session.get("https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/sonderspeiseplaene/cafeteria-markusplatz.html")
         menu = ""
-        i = 0
-        for title in titles:
-            # menu += "{ title: " + title.text + ", price: " + prices[i].text + "€ },"
-            menu += "{" + '\'title\':' + title.text + "," + "\'price\': 2,80€" + "}" + ","
-            menu = menu.strip('"\'')
-            i += 1
 
-        menu = menu[:-1]
-        menu = menu.strip('\"\'')
+    content = r.html.find("article p")
+
+    today_date = str(datetime.date.today().day)
+
+    today_date = datetime.date.today().day
+
+    today_date = today_date + 1
+
+    today_date = str(today_date)
+
+    menu = ""
+
+    for p_element in content:
+        if today_date in p_element.text:
+            menu += p_element.text[7:]
 
 
+    return menu
+
+
+# handle incoming messages and send messages containing menu information to requesting user
 def handle(msg):
     pprint(msg)
     print(msg['text'])
@@ -117,10 +142,22 @@ def handle(msg):
 
     print(user_id)
 
-    if 'menu' in msg_text or 'Menu' in msg_text:
-        msg = ""
+    if 'feki' in msg_text or 'Feki' in  msg_text:
+        sendMessage(user_id, returnFekiMenu())
+    else:
+        if 'markus' in msg_text or 'Markus' in  msg_text:
+            sendMessage(user_id, returnMarkusMenu())
+        else:
+            if 'alles' in msg_text or 'Alles' in msg_text:
+                msg = returnMarkusMenu() + "\n" + "\n" + returnFekiMenu()
+                sendMessage(user_id, msg)
+            else:
+                if 'täglich' in msg_text or 'Täglich' in msg_text:
+                    users.append(user_id)
+                    sendMessage(user_id, "Du bekommst jetzt täglich Infos über das Essen an der Feki, Erba und in der Innenstadt! "
+                                         "Um keine täglichen Nachrichten mehr zu erhalten, sende \"stop\" an mich.")
 
-        sendMessage(user_id, msg)
+
 
 
 def sendMessage(user_id, text):
@@ -129,15 +166,29 @@ def sendMessage(user_id, text):
 
 MessageLoop(bot, handle).run_as_thread()
 
-# def main():
+#def main():
+    #MessageLoop(bot, handle).run_as_thread()
+    #returnFekiMenu()
+    #returnMarkusMenu()
+    #returnCafeteriaMenu("markus")
 
 
 dailyScheduler = BlockingScheduler()
+
+
+def sendScheduledMessages():
+    for user_id in users:
+        sendMessage(user_id, "text")
+
+
+
+dailyScheduler.add_job(sendScheduledMessages(), 'interval', seconds=60)
+
 
 # run requestBitcoin() function once every 60 seconds
 # dailyScheduler.add_job(requestBitCoin, 'interval', seconds=60)
 
 # dailyScheduler.start()
 
-# if __name__== "__main__":
+#if __name__== "__main__":
 #	main()
