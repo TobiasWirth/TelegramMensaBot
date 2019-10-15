@@ -3,6 +3,7 @@ import json
 import os
 import datetime
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from requests_html import HTMLSession
 import requests_html
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -14,6 +15,11 @@ import telepot
 from telepot.loop import MessageLoop
 from pprint import pprint
 import datetime
+
+import flask
+app = flask.Flask(__name__)
+
+
 
 # create Bot
 bot = telepot.Bot('838947615:AAH6WV9wKS-EIOmRL04zgHOSPgBih09fUWE')
@@ -45,7 +51,7 @@ def returnMarkusMenu():
 
     for day in weekDaysMarkus:
 
-        if day.find("div[data-day~=Dienstag]"):
+        if day.find("div[data-day~="+today+"]"):
             currentday = day.find("div[data-day~="+today+"]")
             for fooditem in currentday:
                 titles = fooditem.find(".title")
@@ -68,7 +74,7 @@ def returnMarkusMenu():
 def returnFekiMenu():
 
     r = session.get(
-        'https://web.archive.org/web/20171017053414/http://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene.html?tx_thmensamenu_pi2%5Bmensen%5D=3&tx_thmensamenu_pi2%5Baction%5D=show&tx_thmensamenu_pi2%5Bcontroller%5D=Speiseplan&cHash=c3fe5ebb35e5fba3794f01878e798b7c')
+        'https://www.studentenwerk-wuerzburg.de/bamberg/essen-trinken/speiseplaene/mensa-feldkirchenstrasse-bamberg.html')
     currentWeekFeki = r.html.find('.week.currentweek', first=True)
 
 
@@ -87,7 +93,7 @@ def returnFekiMenu():
 
     for day in weekDaysFeki:
 
-        if day.find("div[data-day~=Dienstag]"):
+        if day.find("div[data-day~="+today+"]"):
             currentday = day.find("div[data-day~="+today+"]")
             for fooditem in currentday:
                 titles = fooditem.find(".title")
@@ -166,14 +172,14 @@ def sendMessage(user_id, text):
 
 MessageLoop(bot, handle).run_as_thread()
 
-#def main():
-    #MessageLoop(bot, handle).run_as_thread()
-    #returnFekiMenu()
-    #returnMarkusMenu()
-    #returnCafeteriaMenu("markus")
+def main():
+    MessageLoop(bot, handle).run_as_thread()
+    returnFekiMenu()
+    returnMarkusMenu()
+    returnCafeteriaMenu("markus")
 
 
-dailyScheduler = BlockingScheduler()
+dailyScheduler = BackgroundScheduler()
 
 
 def sendScheduledMessages():
@@ -182,13 +188,19 @@ def sendScheduledMessages():
 
 
 
-dailyScheduler.add_job(sendScheduledMessages(), 'interval', seconds=60)
+dailyScheduler.add_job(sendScheduledMessages, 'cron', day_of_week='mon-fri', hour=10, minute=0)
 
 
 # run requestBitcoin() function once every 60 seconds
 # dailyScheduler.add_job(requestBitCoin, 'interval', seconds=60)
 
-# dailyScheduler.start()
+dailyScheduler.start()
 
-#if __name__== "__main__":
-#	main()
+
+@app.route("/")
+def index():
+    #do whatevr here...
+    return "Hello Heruko"
+
+if __name__== "__main__":
+	main()
