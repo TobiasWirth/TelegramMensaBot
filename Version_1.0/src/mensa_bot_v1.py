@@ -16,8 +16,11 @@ from telepot.loop import MessageLoop
 from pprint import pprint
 import datetime
 
-import flask
-app = flask.Flask(__name__)
+from os import environ
+from flask import Flask
+
+app = Flask(__name__)
+app.run(host= '0.0.0.0', port=environ.get('PORT'))
 
 
 
