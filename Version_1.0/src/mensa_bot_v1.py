@@ -19,8 +19,11 @@ import datetime
 from os import environ
 from flask import Flask
 
+#app = Flask(__name__)
+#app.run(host= '0.0.0.0', port=environ.get('PORT'))
+
 app = Flask(__name__)
-app.run(host= '0.0.0.0', port=environ.get('PORT'))
+app.run(environ.get('PORT'))
 
 
 
@@ -176,6 +179,7 @@ def sendMessage(user_id, text):
 MessageLoop(bot, handle).run_as_thread()
 
 def main():
+
     MessageLoop(bot, handle).run_as_thread()
     returnFekiMenu()
     returnMarkusMenu()
@@ -200,10 +204,10 @@ dailyScheduler.add_job(sendScheduledMessages, 'cron', day_of_week='mon-fri', hou
 dailyScheduler.start()
 
 
-@app.route("/")
-def index():
+#@app.route("/")
+#def index():
     #do whatevr here...
-    return "Hello Heruko"
+#    return "Hello Heruko"
 
 if __name__== "__main__":
 	main()
