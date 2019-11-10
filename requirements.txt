@@ -1,5 +1,5 @@
 requests==2.22.0
 telepot==12.7
 requests_html==0.10.0
-Flask==0.8
+Flask==1.0
 
