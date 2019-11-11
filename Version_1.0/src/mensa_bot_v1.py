@@ -25,6 +25,8 @@ app.run(host= '0.0.0.0', port=environ.get('PORT'))
 #app = Flask(__name__)
 #app.run(environ.get('PORT'))
 
+while True:
+    print('I am running')
 
 
 # create Bot
@@ -179,6 +181,7 @@ def sendMessage(user_id, text):
 MessageLoop(bot, handle).run_as_thread()
 
 def main():
+    print("Hello World")
 
     MessageLoop(bot, handle).run_as_thread()
     returnFekiMenu()
